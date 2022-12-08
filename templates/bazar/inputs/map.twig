@@ -1,0 +1,37 @@
+{# # This file is part of the YesWiki Extension geolocation.
+# Authors : see README.md file that was distributed with this source code.
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code. #}
+
+{% if field.autocomplete is not empty %}
+    <script>
+        var autocompleteFieldnames = {
+            postalCode: "{{ field.autocomplete|split(',')|first }}",
+            town: "{{ field.autocomplete|split(',')[1:1]|first }}"
+        }
+    </script>
+    {{ include_javascript('tools/geolocation/javascripts/fields/map-field-autocomplete.js') }}
+{% endif %}
+
+{{ include_css('styles/vendor/leaflet/leaflet.css') }}
+{{ include_javascript('tools/bazar/presentation/javascripts/geocoder.js') }}
+{{ include_javascript('javascripts/vendor/leaflet/leaflet.min.js') }}
+{{ include_javascript('javascripts/vendor/leaflet-providers/leaflet-providers.js') }}
+
+<script>
+    var mapFieldData = {{ mapFieldData|json_encode|raw }}
+</script>
+
+{{ include_javascript('tools/geolocation/javascripts/fields/map-field-leaflet.js') }}
+
+<div class="control-group form-group geocode-input {% if field.required %}required{% endif %}">
+    <label class="col-sm-3"></label>
+    <div class="controls col-sm-9">
+        <a class="btn btn-primary btn-geolocate-address">
+            {{ _t('BAZ_VERIFIER_MON_ADRESSE') }}
+        </a>
+        <input type="hidden" value="{{ latitude }}" id="bf_latitude" name="bf_latitude">
+        <input type="hidden" value="{{ longitude }}" id="bf_longitude" name="bf_longitude">
+        <div id="osmmapform" style="margin-top:5px; width:{{ config.baz_map_width }}; height:{{ config.baz_map_height }};"></div>
+    </div>
+</div>

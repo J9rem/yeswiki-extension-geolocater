@@ -12,6 +12,7 @@
 
 namespace YesWiki\Geolocation\Field;
 
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Psr\Container\ContainerInterface;
 use YesWiki\Bazar\Field\MapField as BazarMapField;
 
@@ -67,6 +68,50 @@ class MapField extends BazarMapField
         $state = empty($data[4]) ? self::DEFAULT_FIELDNAME_STATE : $data[4];
 
         $this->autocompleteFieldnames = compact(['postalCode','town','street','street1','street2','county','state']);
+    }
+
+    protected function renderInput($entry)
+    {
+        $value = $this->getValue($entry);
+        $params = $this->getService(ParameterBagInterface::class);
+
+        $mapProvider= $params->get('baz_provider');
+        $mapProviderId = $params->get('baz_provider_id');
+        $mapProviderPass = $params->get('baz_provider_pass');
+        if (!empty($mapProviderId) && !empty($mapProviderPass)) {
+            if ($mapProvider == 'MapBox') {
+                $mapProviderCredentials = [
+                    'id' => $mapProviderId,
+                    'accessToken' => $mapProviderPass
+                ];
+            } else {
+                $mapProviderCredentials = [
+                    'app_id' => $mapProviderId,
+                    'app_code' => $mapProviderPass
+                ];
+            }
+        } else {
+            $mapProviderCredentials = null;
+        }
+
+        $latitude = is_array($value) && !empty($value[$this->getLatitudeField()]) ? $value[$this->getLatitudeField()] : null;
+        $longitude = is_array($value) && !empty($value[$this->getLongitudeField()]) ? $value[$this->getLongitudeField()] : null;
+
+        return $this->render("@bazar/inputs/map.twig", [
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'mapFieldData' => [
+                'bazWheelZoom' => $params->get('baz_wheel_zoom'),
+                'bazShowNav' => $params->get('baz_show_nav'),
+                'bazMapCenterLat' => $params->get('baz_map_center_lat'),
+                'bazMapCenterLon' => $params->get('baz_map_center_lon'),
+                'bazMapZoom' => $params->get('baz_map_zoom'),
+                'mapProvider' => $mapProvider,
+                'mapProviderCredentials' => $mapProviderCredentials,
+                'latitude' => $latitude,
+                'longitude' => $longitude
+            ]
+        ]);
     }
 
     // GETTERS. Needed to use them in the Twig syntax
