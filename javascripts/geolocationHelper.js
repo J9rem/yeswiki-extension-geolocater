@@ -40,7 +40,11 @@ const geolocationHelper = (function(){
                         if (!eventData.once || !eventData.triggered){
                             this.eventsListeners[eventName][idx].triggered = true;
                             if (param != undefined){
-                                eventData.listener(param);
+                                if (Array.isArray(param)){
+                                    eventData.listener(...param);
+                                } else {
+                                    eventData.listener(param);
+                                }
                             } else {
                                 eventData.listener();
                             }
@@ -92,7 +96,9 @@ const geolocationHelper = (function(){
         data: function(){
             return {
                 cache: {
-                    fromPostalCode: {}
+                    fromAddress: {},
+                    fromPostalCode: {},
+                    fromTown: {}
                 },
                 countries:// World's countries with country code, name and bounding box
                 [
@@ -272,14 +278,172 @@ const geolocationHelper = (function(){
                 ],
                 eventDispatcher,
                 isInit: false,
-                isDebugMode: false
+                isDebugMode: false,
+                loadingUrl: {}
             };
         },
         methods: {
-            async geolocate(text){
+            convertDataFromGouvApi (data,countryCode,country){
+                return data
+                    .filter((entry)=>{
+                        return typeof entry === 'object' &&
+                            'codesPostaux' in entry &&
+                            'departement' in entry &&
+                            'region' in entry &&
+                            'nom' in entry
+                    })
+                    .map((entry)=>{
+                        return this.toGeolocationData({
+                            postalCode: entry.codesPostaux[0],
+                            town: entry.nom,
+                            county: entry.departement.nom,
+                            countyCode: entry.departement.code,
+                            state: entry.region.nom,
+                            stateCode: entry.region.code,
+                            countryCode,
+                            country
+                        })
+                    })
+            },
+            async geolocate(address){
                 await this.waitInit()
-                this.log(text)
-                return ''
+                if (typeof address !== 'string'){
+                    throw new Error('address shoud be a string')
+                }
+                let sanitizedAddress = this.sanitizeAddress(address)
+                if (sanitizedAddress.length === 0){
+                    throw new Error('empty sanitized address')
+                }
+                if (sanitizedAddress in this.cache.fromAddress){
+                    return this.cache.fromAddress[sanitizedAddress]
+                } else {
+                    this.log(`geolocate '${sanitizedAddress}'`)
+                    return await this.eventDispatcher.runOnceOrWait(sanitizedAddress,'fromAddress',async ()=>{
+                        return this.getJsonWithTimeLimitThenWait(
+                            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(sanitizedAddress)}&format=json`,
+                            'nominatim.openstreetmap.org',
+                            1000
+                            )
+                            .then((data)=>{
+                                if (!Array.isArray(data)){
+                                    throw new Error('waited array when getting postalCode')
+                                }
+                                this.cache.fromAddress[sanitizedAddress] = data
+                                    .filter((entry)=>{
+                                        return typeof entry === 'object' &&
+                                            'lat' in entry &&
+                                            'lon' in entry &&
+                                            'display_name' in entry &&
+                                            'type' in entry
+                                    })
+                                    .map((entry)=>{
+                                        let latitude = entry.lat
+                                        let longitude = entry.lon
+                                        let infos = entry.display_name.split(',').map((e)=>e.trim())
+                                        let postalCode = (infos.length > 2 && typeof Number(infos[infos.length-2]) === 'number')
+                                            ? {postalCode: infos[infos.length-2]}: {}
+                                        switch (entry.type) {
+                                            case 'administrative':
+                                                return this.toGeolocationData({
+                                                    ...{
+                                                        town: infos[0],
+                                                        country: infos[infos.length-1],
+                                                        latitude,
+                                                        longitude
+                                                    },
+                                                    ...postalCode
+                                                })
+                                            case 'residential':
+                                                return this.toGeolocationData({
+                                                    ...{
+                                                        street: infos[0],
+                                                        state: infos[4] || '',
+                                                        county: infos[3] || '',
+                                                        town: infos[2] || '',
+                                                        country: infos[infos.length-1],
+                                                        latitude,
+                                                        longitude
+                                                    },
+                                                    ...postalCode
+                                                })
+                                            case 'hamlet':
+                                            case 'village':
+                                                return this.toGeolocationData({
+                                                    ...{
+                                                        street: infos[0],
+                                                        state: infos[4] || '',
+                                                        county: infos[3] || '',
+                                                        town: infos[1] || '',
+                                                        country: infos[infos.length-1],
+                                                        latitude,
+                                                        longitude
+                                                    },
+                                                    ...postalCode
+                                                })
+                                            case 'postal_code':
+                                                return this.toGeolocationData({
+                                                    ...{
+                                                        state: infos[0],
+                                                        country: infos[infos.length-1],
+                                                        latitude,
+                                                        longitude
+                                                    },
+                                                    ...postalCode
+                                                })
+                                            case 'postcode':
+                                                return this.toGeolocationData({
+                                                    ...{
+                                                        street: infos[0],
+                                                        town: infos[1] || '',
+                                                        county: infos[2] || '',
+                                                        state: infos[3] || '',
+                                                        country: infos[infos.length-1],
+                                                        latitude,
+                                                        longitude
+                                                    },
+                                                    ...postalCode
+                                                })
+                                            case 'unclassified':
+                                                if ('class' in entry && entry.class === 'highway'){
+                                                    return this.toGeolocationData({
+                                                        ...{
+                                                            street: infos[0],
+                                                            street1: infos[1],
+                                                            state: infos[5] || '',
+                                                            county: infos[4] || '',
+                                                            town: infos[2] || '',
+                                                            country: infos[infos.length-1],
+                                                            latitude,
+                                                            longitude
+                                                        },
+                                                        ...postalCode,
+                                                        ...(
+                                                            infos.length === 11
+                                                            ? {
+                                                                street2: infos[2],
+                                                                town: infos[4] || '',
+                                                                county: infos[6] || '',
+                                                                state: infos[7] || '',
+                                                            } : {}
+                                                        )
+                                                    })
+                                                }
+                                            default:
+                                                return this.toGeolocationData({
+                                                    country: infos[infos.length-1],
+                                                    latitude,
+                                                    longitude
+                                                })
+                                        }
+                                    })
+                                return this.cache.fromAddress[sanitizedAddress]
+                            })
+                            .catch((error)=>{
+                                this.log(error,'error')
+                                return [this.toGeolocationData({countryCode,country})]
+                            })
+                    })
+                }
             },
             getCountry(code){
                 var foundData = this.countries.find((countryData)=>{
@@ -310,12 +474,12 @@ const geolocationHelper = (function(){
                     throw new Error(`Country '${country}' not found`)
                 }
             },
-            async getGelocationDataFromPostalCode(country,postalCode){
+            async getGelocationDataFromGouv(country,id,fromCache,intoUrl){
                 if (typeof country !== 'string'){
                     throw new Error('country shoud be a string')
                 }
-                if (!['string','number'].includes(typeof postalCode)){
-                    throw new Error('postalCode shoud be a string or number')
+                if (typeof id !== 'string'){
+                    throw new Error('id shoud be a string')
                 }
                 let countryCode = ''
                 try {
@@ -325,38 +489,21 @@ const geolocationHelper = (function(){
                     return []
                 }
                 if (country.toLowerCase() === 'france'){
-                    if (postalCode in this.cache.fromPostalCode){
-                        return this.cache.fromPostalCode[postalCode]
+                    if (id in this.cache[fromCache]){
+                        return this.cache[fromCache][id]
                     }
-                    return await this.eventDispatcher.runOnceOrWait(`${country}-${postalCode}`,'fromPostalCode',async ()=>{
-                        return this.getJsonWithTimeLimit(
-                            `https://geo.api.gouv.fr/communes?codePostal=${postalCode}&fields=codesPostaux,departement,region`
+                    return await this.eventDispatcher.runOnceOrWait(`${country}-${id}`,fromCache,async ()=>{
+                        return this.getJsonWithTimeLimitThenWait(
+                            `https://geo.api.gouv.fr/communes?${intoUrl}&fields=codesPostaux,departement,region`,
+                            'geo.api.gouv.fr',
+                            100
                             )
                             .then((data)=>{
                                 if (!Array.isArray(data)){
-                                    throw new Error('waited array when getting postalCode')
+                                    throw new Error(`waited array when getting ${id}`)
                                 }
-                                this.cache.fromPostalCode[postalCode] = data
-                                    .filter((entry)=>{
-                                        return typeof entry === 'object' &&
-                                            'codesPostaux' in entry &&
-                                            'departement' in entry &&
-                                            'region' in entry &&
-                                            'nom' in entry
-                                    })
-                                    .map((entry)=>{
-                                        return this.toGeolocationData({
-                                            postalCode: entry.codesPostaux[0],
-                                            town: entry.nom,
-                                            county: entry.departement.nom,
-                                            countyCode: entry.departement.code,
-                                            state: entry.region.nom,
-                                            stateCode: entry.region.code,
-                                            countryCode,
-                                            country
-                                        })
-                                    })
-                                return this.cache.fromPostalCode[postalCode]
+                                this.cache[fromCache][id] = this.convertDataFromGouvApi (data,countryCode,country)
+                                return this.cache[fromCache][id]
                             })
                             .catch((error)=>{
                                 this.log(error,'error')
@@ -366,6 +513,56 @@ const geolocationHelper = (function(){
                 } else {
                     return [this.toGeolocationData({countryCode,country})]
                 }
+
+            },
+            async getGelocationDataFromPostalCode(country,postalCode){
+                if (!['string','number'].includes(typeof postalCode)){
+                    throw new Error('postalCode shoud be a string or number')
+                }
+                return this.getGelocationDataFromGouv(country,postalCode,'fromPostalCode',`codePostal=${postalCode}`)
+            },
+            async getGelocationDataFromTown(country,town){
+                if (typeof town !== 'string'){
+                    throw new Error('town shoud be a string')
+                }
+                return this.getGelocationDataFromGouv(country,town,'fromTown',`nom=${town}`)
+            },
+            async getJsonWithTimeLimitThenWait(url,id,minimumTimeToWait = 100,timeLimit = 5000){
+                if (!(id in this.loadingUrl) || (typeof this.loadingUrl[id] !== 'object')){
+                    this.loadingUrl[id] = {
+                        running: false,
+                        next: []
+                    }
+                }
+                const canStartDirectly = !this.loadingUrl[id].running
+
+                let processNext = ()=>{
+                    if (this.loadingUrl[id].next.length == 0){
+                        this.loadingUrl[id].running = false
+                    } else {
+                        this.loadingUrl[id].running = true
+                        const firstToresolve = this.loadingUrl[id].next[0]
+                        this.loadingUrl[id].next = 
+                            (this.loadingUrl[id].next.length > 1)
+                            ? this.loadingUrl[id].next.slice(1)
+                            : []
+                        firstToresolve()
+                    }
+                }
+                
+                let p = new Promise((resolve)=>{
+                    this.loadingUrl[id].next = [
+                        ...this.loadingUrl[id].next,
+                        resolve
+                    ]
+                    if (canStartDirectly){
+                        processNext()
+                    }
+                })
+                return await p.then(()=>this.getJsonWithTimeLimit(url,timeLimit))
+                    .finally(()=>{
+                        setTimeout(()=>processNext(),minimumTimeToWait)
+                    })
             },
             async getJsonWithTimeLimit(url,timeLimit = 5000){
                 const abortController = new AbortController()
@@ -398,12 +595,15 @@ const geolocationHelper = (function(){
             normalizeNFDDiacritic(text){
                 return text.normalize("NFD").replace(/\p{Diacritic}/gu, "").replace (/[-]/g, " ").toLowerCase();
             },
+            sanitizeAddress(address){
+                return address.replace(/\\("|\'|\\)/g, ' ').trim()
+            },
             toGeolocationData(data){
                 let sanitizedData = (typeof data === 'object') ? data : {}
                 let exportData = {}
                 let tab = [
                     'street','street1','street2','postalCode','town','county',
-                    'countyCode','state','stateCode','country','countryCode'
+                    'countyCode','state','stateCode','country','countryCode', 'latitude', 'longitude'
                 ]
                 tab.forEach((key)=>{
                     exportData[key] = (key in sanitizedData && ['string','number'].includes(typeof sanitizedData[key]))
@@ -456,8 +656,22 @@ const geolocationHelper = (function(){
         async getGelocationDataFromPostalCode(country,postalCode){
             return geolocationHelperInternal.methods.getGelocationDataFromPostalCode(country,postalCode)
         },
-        async geolocate(text){
-            return geolocationHelperInternal.methods.geolocate(text);
+        async getGelocationDataFromTown(country,town){
+            return geolocationHelperInternal.methods.getGelocationDataFromTown(country,town)
+        },
+        async geolocate(address){
+            return geolocationHelperInternal.methods.geolocate(address)
+        },
+        async geolocateRetryWithoutNumberAtBeginningIfNeeded(address){
+            return await geolocationHelperInternal.methods.geolocate(address).then((results)=>{
+                if (results.length == 0){
+                    const matches = geolocationHelperInternal.methods.sanitizeAddress(address).match(/^\d+(.*)/i)
+                    if (matches) {
+                        return geolocationHelperInternal.methods.geolocate(matches[1])
+                    }
+                }
+                return results
+            })
         }
     }
 })()

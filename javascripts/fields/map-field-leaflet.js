@@ -44,13 +44,22 @@ $(document).ready(function() {
     function showAddress(map) {
         var address = "";
         fields.forEach((field) => address += field.val() + " ")
-        console.log("geocode address", address);
         address = address.replace(/\\("|'|\\)/g, " ").trim();
         if (!address) {
             geocodedmarkerRefresh( map.getCenter() );
             return
         }
-        geocodage( address, showAddressOk, showAddressError );
+        geolocationHelper.geolocateRetryWithoutNumberAtBeginningIfNeeded(address)
+            .then((data)=>{
+                if (data.length > 0 && data[0].latitude.length > 0 && data[0].longitude.length > 0){
+                    showAddressOk(data[0].longitude, data[0].latitude )
+                } else {
+                    showAddressError('bad format')
+                }
+            })
+            .catch((error)=>{
+                showAddressError(error instanceof Error ? Error.message : String(error))
+            })
         return false;
     }
     function showAddressOk( lon, lat )
