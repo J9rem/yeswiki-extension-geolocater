@@ -475,6 +475,7 @@ const geolocationHelper = (function(){
                 }
             },
             async getGelocationDataFromGouv(country,id,fromCache,intoUrl){
+                await this.waitInit()
                 if (typeof country !== 'string'){
                     throw new Error('country shoud be a string')
                 }
