@@ -329,18 +329,9 @@ const geolocationHelper = (function(){
                         return this.cache.fromPostalCode[postalCode]
                     }
                     return await this.eventDispatcher.runOnceOrWait(`${country}-${postalCode}`,'fromPostalCode',async ()=>{
-                        const abortController = new AbortController()
-                        const resetTimeoutId = setTimeout(()=>abortController.abort(),5000) // limit to 5 seconds
-                        return fetch(
-                            `https://geo.api.gouv.fr/communes?codePostal=${postalCode}&fields=codesPostaux,departement,region`,
-                            {signal:abortController.signal}
+                        return this.getJsonWithTimeLimit(
+                            `https://geo.api.gouv.fr/communes?codePostal=${postalCode}&fields=codesPostaux,departement,region`
                             )
-                            .then((response)=>{
-                                if (!response.ok){
-                                    throw new Error('response not ok when getting data from postal code')
-                                }
-                                return response.json()
-                            })
                             .then((data)=>{
                                 if (!Array.isArray(data)){
                                     throw new Error('waited array when getting postalCode')
@@ -371,13 +362,24 @@ const geolocationHelper = (function(){
                                 this.log(error,'error')
                                 return [this.toGeolocationData({countryCode,country})]
                             })
-                            .finally(()=>{
-                                clearTimeout(resetTimeoutId)
-                            })
                     })
                 } else {
                     return [this.toGeolocationData({countryCode,country})]
                 }
+            },
+            async getJsonWithTimeLimit(url,timeLimit = 5000){
+                const abortController = new AbortController()
+                const resetTimeoutId = setTimeout(()=>abortController.abort(),timeLimit)
+                return fetch(url,{signal:abortController.signal})
+                    .then((response)=>{
+                        if (!response.ok){
+                            throw new Error('response not ok when getting data from postal code')
+                        }
+                        return response.json()
+                    })
+                    .finally(()=>{
+                        clearTimeout(resetTimeoutId)
+                    })
             },
             log(object, type = 'log'){
                 if (!['log','error','warn'].includes(type)) {
