@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the YesWiki Extension geolocation.
+ * This file is part of the YesWiki Extension geolocater.
  *
  * Authors : see README.md file that was distributed with this source code.
  *
@@ -10,7 +10,7 @@
  *
  */
 
-namespace YesWiki\Geolocation\Field;
+namespace YesWiki\Geolocater\Field;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Psr\Container\ContainerInterface;

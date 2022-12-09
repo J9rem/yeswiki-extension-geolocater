@@ -27,7 +27,7 @@ If applicable, add screenshots to help explain your problem.
 **Server (please complete the following information):**
  - YesWiki revision: [e.g doryphore, ectoplasme, doryphore-test]
  - YesWiki release: [e.g. 4.2.4, 4.3.0]
- - geolocation extension revision: [e.g 0.1.0, 2022-10-01-1]
+ - geolocater extension revision: [e.g 0.1.0, 2022-10-01-1]
 
 **Additional context**
 Add any other context about the problem here.

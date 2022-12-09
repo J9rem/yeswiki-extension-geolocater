@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the YesWiki Extension geolocation.
+ * This file is part of the YesWiki Extension geolocater.
  *
  * Authors : see README.md file that was distributed with this source code.
  *
@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace YesWiki\Geolocation;
+namespace YesWiki\Geolocater;
 
 use BazarAction;
 use YesWiki\Core\YesWikiAction;
@@ -23,8 +23,8 @@ class BazarAction__ extends YesWikiAction
             && isset($this->arguments[BazarAction::VARIABLE_VOIR]) && $this->arguments[BazarAction::VARIABLE_VOIR] === BazarAction::VOIR_FORMULAIRE
             && isset($this->arguments[BazarAction::VARIABLE_ACTION]) && in_array($this->arguments[BazarAction::VARIABLE_ACTION], [BazarAction::ACTION_FORM_CREATE,BazarAction::ACTION_FORM_EDIT], true)
         ) {
-            $this->wiki->AddJavascriptFile('tools/geolocation/javascripts/fields/map-field-form-edit-template.js');
-            $this->wiki->AddCSSFile('tools/geolocation/styles/fields/map-field-form-edit-template.css');
+            $this->wiki->AddJavascriptFile('tools/geolocater/javascripts/fields/map-field-form-edit-template.js');
+            $this->wiki->AddCSSFile('tools/geolocater/styles/fields/map-field-form-edit-template.css');
         }
     }
 }

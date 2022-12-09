@@ -1,4 +1,4 @@
-# yeswiki-extension-geolocation
+# yeswiki-extension-geolocater
 
  - [English](#english)
  - [Français](#français)
@@ -11,11 +11,11 @@ Extension [YesWiki](https://yeswiki.net/) to improve geolocation in bazar
 
  - Yves Gufflet
  - Jérémy Dufraisse
- - and all contributors indicated on this page : <https://github.com/J9rem/yeswiki-extension-geolocation/graphs/contributors>
+ - and all contributors indicated on this page : <https://github.com/J9rem/yeswiki-extension-geolocater/graphs/contributors>
 
 ### Install
 
-In page `GererMisesAJour` on your YesWiki website, search extension `Geolocation` and install it.
+In page `GererMisesAJour` on your YesWiki website, search extension `Geolocater` and install it.
 
 ### Usage
 
@@ -34,11 +34,11 @@ Extension [YesWiki](https://yeswiki.net/) pour améliorer la géolocation dans b
 
  - Yves Gufflet
  - Jérémy Dufraisse
- - et tous les contributeurs et toutes les contributrices indiqués sur cette page : <https://github.com/J9rem/yeswiki-extension-geolocation/graphs/contributors>
+ - et tous les contributeurs et toutes les contributrices indiqués sur cette page : <https://github.com/J9rem/yeswiki-extension-geolocater/graphs/contributors>
 
 ### Installation
 
-Dans la page `GererMisesAJour` de votre YesWiki, recherchez l'extension `Geolocation` et installez-là.
+Dans la page `GererMisesAJour` de votre YesWiki, recherchez l'extension `Geolocater` et installez-là.
 
 ### Utilisation
 

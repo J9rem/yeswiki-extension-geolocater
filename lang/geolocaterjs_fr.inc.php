@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the YesWiki Extension geolocation.
+ * This file is part of the YesWiki Extension geolocater.
  *
  * Authors : see README.md file that was distributed with this source code.
  *
@@ -23,8 +23,8 @@ return [
     'BAZ_FORM_EDIT_MAP_AUTOCOMPLETE_STREET1_PLACEHOLDER' => 'bf_adresse1',
     'BAZ_FORM_EDIT_MAP_AUTOCOMPLETE_STREET2_PLACEHOLDER' => 'bf_adresse2',
     'BAZ_FORM_EDIT_MAP_AUTOCOMPLETE_TOWN' => 'Champ ville',
-    'GEOLOCATION_GROUP_AUTOCOMPLETE_TITLE' => 'Champs pour l\'autocomplétion',
-    'GEOLOCATION_OPTIONNAL' => 'falcutatif',
+    'GEOLOCATER_GROUP_AUTOCOMPLETE_TITLE' => 'Champs pour l\'autocomplétion',
+    'GEOLOCATER_OPTIONNAL' => 'falcutatif',
 
     // javascripts/fields/map-field-leaflet.js
     'BAZ_ADJUST_MARKER_POSITION' => 'Déplacez moi si besoin',

@@ -1,6 +1,6 @@
 # Contributing rules for the repository
 
-To contribute into the current repository https://github.com/J9rem/yeswiki-extension-geolocation, you should follow these rules.
+To contribute into the current repository https://github.com/J9rem/yeswiki-extension-geolocater, you should follow these rules.
 
 ## Languages
 

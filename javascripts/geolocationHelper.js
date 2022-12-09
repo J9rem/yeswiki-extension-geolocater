@@ -1,5 +1,5 @@
 /*
- * This file is part of the YesWiki Extension geolocation.
+ * This file is part of the YesWiki Extension geolocater.
  *
  * Authors : see README.md file that was distributed with this source code.
  *
@@ -256,6 +256,6 @@ const geolocationHelper = {
 };
 
 // When document is ready
-window.addEventListener("load", ()=>geolocationHelper.mounted());
+window.addEventListener("load", ()=>geolocaterHelper.mounted());
 
 })()

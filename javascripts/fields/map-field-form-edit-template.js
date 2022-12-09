@@ -1,5 +1,5 @@
 /*
- * This file is part of the YesWiki Extension geolocation.
+ * This file is part of the YesWiki Extension geolocater.
  *
  * Authors : see README.md file that was distributed with this source code.
  *
@@ -128,11 +128,11 @@ templates.map = function(field){
         field: _t('BAZ_FORM_EDIT_MAP_FIELD'),
         onRender() {
             initMapAutocompleteUpdate()
-            templateHelper.prependHTMLBeforeGroup(field, 'autocomplete_street', $('<div/>').addClass('form-group').append($('<b/>').append(_t('GEOLOCATION_GROUP_AUTOCOMPLETE_TITLE'))))
-            templateHelper.defineLabelHintForGroup(field, 'autocomplete_street1', _t('GEOLOCATION_OPTIONNAL'))
-            templateHelper.defineLabelHintForGroup(field, 'autocomplete_street2', _t('GEOLOCATION_OPTIONNAL'))
-            templateHelper.defineLabelHintForGroup(field, 'autocomplete_county', _t('GEOLOCATION_OPTIONNAL'))
-            templateHelper.defineLabelHintForGroup(field, 'autocomplete_state', _t('GEOLOCATION_OPTIONNAL'))
+            templateHelper.prependHTMLBeforeGroup(field, 'autocomplete_street', $('<div/>').addClass('form-group').append($('<b/>').append(_t('GEOLOCATER_GROUP_AUTOCOMPLETE_TITLE'))))
+            templateHelper.defineLabelHintForGroup(field, 'autocomplete_street1', _t('GEOLOCATER_OPTIONNAL'))
+            templateHelper.defineLabelHintForGroup(field, 'autocomplete_street2', _t('GEOLOCATER_OPTIONNAL'))
+            templateHelper.defineLabelHintForGroup(field, 'autocomplete_county', _t('GEOLOCATER_OPTIONNAL'))
+            templateHelper.defineLabelHintForGroup(field, 'autocomplete_state', _t('GEOLOCATER_OPTIONNAL'))
         }
     }
 }
