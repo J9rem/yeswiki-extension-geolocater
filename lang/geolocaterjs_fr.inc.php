@@ -24,7 +24,7 @@ return [
     'BAZ_FORM_EDIT_MAP_AUTOCOMPLETE_STREET2_PLACEHOLDER' => 'bf_adresse2',
     'BAZ_FORM_EDIT_MAP_AUTOCOMPLETE_TOWN' => 'Champ ville',
     'GEOLOCATER_GROUP_AUTOCOMPLETE_TITLE' => 'Champs pour l\'autocomplétion',
-    'GEOLOCATER_OPTIONNAL' => 'falcutatif',
+    'GEOLOCATER_OPTIONNAL' => 'facultatif',
 
     // javascripts/fields/map-field-leaflet.js
     'BAZ_ADJUST_MARKER_POSITION' => 'Déplacez moi si besoin',

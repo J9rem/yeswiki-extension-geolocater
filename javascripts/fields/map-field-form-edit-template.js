@@ -67,11 +67,11 @@ var mapAutocompleteUpdateExtractFromOther = function(base){
         .first()
     if (autoCompleteOther && autoCompleteOther.length > 0){
         const value = autoCompleteOther.val().split('|')
-        results.street = value[0] || ''
-        results.street1 = value[1] || ''
-        results.street2 = value[2] || ''
-        results.county = value[3] || ''
-        results.state = value[4] || ''
+        results.street = value[1] || ''
+        results.street1 = value[2] || ''
+        results.street2 = value[3] || ''
+        results.county = value[4] || ''
+        results.state = value[5] || ''
     }
     return results
 }
@@ -103,7 +103,7 @@ var autocompleteUpdateSaveToOther = function(base){
             }
         }
         autoCompleteOther.val(
-            results.street
+            `|${results.street}` // compatibility with geolocate
             + `|${results.street1}`
             + `|${results.street2}`
             + `|${results.county}`

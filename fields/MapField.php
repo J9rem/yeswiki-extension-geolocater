@@ -61,11 +61,11 @@ class MapField extends BazarMapField
                 )
             );
         $data = array_map('trim', explode('|', $autocompleteFieldnames));
-        $street = empty($data[0]) ? self::DEFAULT_FIELDNAME_STREET : $data[0];
-        $street1 = empty($data[1]) ? self::DEFAULT_FIELDNAME_STREET1 : $data[1];
-        $street2 = empty($data[2]) ? self::DEFAULT_FIELDNAME_STREET2 : $data[2];
-        $county = empty($data[3]) ? self::DEFAULT_FIELDNAME_COUNTY : $data[3];
-        $state = empty($data[4]) ? self::DEFAULT_FIELDNAME_STATE : $data[4];
+        $street = empty($data[1]) ? self::DEFAULT_FIELDNAME_STREET : $data[1];
+        $street1 = empty($data[2]) ? self::DEFAULT_FIELDNAME_STREET1 : $data[2];
+        $street2 = empty($data[3]) ? self::DEFAULT_FIELDNAME_STREET2 : $data[3];
+        $county = empty($data[4]) ? self::DEFAULT_FIELDNAME_COUNTY : $data[4];
+        $state = empty($data[5]) ? self::DEFAULT_FIELDNAME_STATE : $data[5];
 
         $this->autocompleteFieldnames = compact(['postalCode','town','street','street1','street2','county','state']);
     }
