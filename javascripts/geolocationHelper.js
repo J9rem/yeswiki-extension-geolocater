@@ -363,7 +363,7 @@ const geolocationHelper = (function(){
                             )
                             .then((data)=>{
                                 if (!Array.isArray(data)){
-                                    throw new Error('waited array when getting postalCode')
+                                    throw new Error('waited array when getting address')
                                 }
                                 this.cache.fromAddress[sanitizedAddress] = data
                                     .filter((entry)=>{
