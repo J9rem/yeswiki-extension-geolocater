@@ -283,6 +283,43 @@ const geolocationHelper = (function(){
             };
         },
         methods: {
+            // calculate geodesic distance
+            calculateGeodesicDistance({point1={latitude:'',longitude:''},point2={latitude:'',longitude:''}}){
+                // sanitize
+                ['point1','point2'].forEach((name)=>{
+                    const val = eval(name)
+                    if (typeof val !== 'object' || val === null){
+                        throw new Error(`${name} should be an object`)
+                    }
+                    ['latitude','longitude'].forEach((key)=>{
+                        if (!(key in val)){
+                            throw new Error(`${name} should contain key '${key}'`)
+                        }
+                        if (Number.isNaN(val[key])) {
+                            throw new Error(`${name}[${key}] should be a number`)
+                        }
+                    })
+                })
+                // Radius in Km
+                const radiusEarthKm = 6371.07103;
+                
+                // Convert degrees to radians 
+                const radiusLatFrom = Number(point1.latitude) * (Math.PI /180);
+                const radiusLatTo = Number(point2.latitude) * (Math.PI /180);
+
+                // Radian difference (latitudes)
+                const latDiff = radiusLatTo - radiusLatFrom;
+
+                // Radian difference (longitudes)
+                const lngDiff = (Number(point1.longitude) - Number(point1.longitude)) * (pi() /180);
+
+                return 2 * radiusEarthKm * Math.sin(
+                        Math.sqrt(
+                            Math.sin(latDiff/2) * Math.sin(latDiff/2) + 
+                            Math.cos(radiusLatFrom) * Math.cos(radiusLatTo) * Math.sin(lngDiff/2)*Math.sin(lngDiff/2)
+                        )
+                    )
+            },
             convertDataFromGouvApi (data,countryCode,country){
                 return data
                     .filter((entry)=>{
@@ -642,6 +679,10 @@ const geolocationHelper = (function(){
 
     // public methods
     return {
+        // calculate geodesic distance
+        calculateGeodesicDistance({point1={latitude:'',longitude:''},point2={latitude:'',longitude:''}}){
+            return geolocationHelperInternal.methods.calculateGeodesicDistance({point1,point2})
+        },
         // Return the country name giving its country code
         getCountry(code){
             return geolocationHelperInternal.methods.getCountry(code)
