@@ -19,10 +19,12 @@ $(document).ready(function () {
           .then((data)=>{
               var result = [];
               data.forEach((geoloc)=>{
-                result.push({
-                  id: geoloc.postalCode,
-                  name: `${geoloc.postalCode} ${geoloc.town}`,
-                  ville: geoloc.town
+                geoloc.postalCodes.forEach((code)=>{
+                  result.push({
+                    id: code,
+                    name: `${code} ${geoloc.town}`,
+                    ville: geoloc.town
+                  })
                 })
               })
               callback(result)
@@ -52,10 +54,12 @@ $(document).ready(function () {
               var result = [];
               if (data.length > 0) {
                 data.forEach((geoloc)=>{
-                  result.push({
-                    id: geoloc.postalCode,
-                    name: `${geoloc.postalCode} ${geoloc.town}`,
-                    ville: geoloc.town
+                  geoloc.postalCodes.forEach((code)=>{
+                    result.push({
+                      id: code,
+                      name: `${code} ${geoloc.town}`,
+                      ville: geoloc.town
+                    })
                   })
                 })
                 callback(result)
