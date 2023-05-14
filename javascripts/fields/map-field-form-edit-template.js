@@ -127,12 +127,47 @@ templates.map = function(field){
     return {
         field: _t('BAZ_FORM_EDIT_MAP_FIELD'),
         onRender() {
+            const toggleState = function (name,state){
+                const holder = templateHelper.getHolder(field)
+                if (holder) {
+                    const formGroup = holder.find(`.${name}-wrap`)
+                    if (typeof formGroup !== undefined && formGroup.length > 0) {
+                        if (state === 'show'){
+                        formGroup.show()
+                        } else {
+                        formGroup.hide()
+                        }
+                    }
+                }
+            }
+            const toggleStates = function (state){
+              ['autocomplete_street1','autocomplete_street2'].forEach((name)=>toggleState(name,state))
+            }
             initMapAutocompleteUpdate()
-            templateHelper.prependHTMLBeforeGroup(field, 'autocomplete_street', $('<div/>').addClass('form-group').append($('<b/>').append(_t('GEOLOCATER_GROUP_AUTOCOMPLETE_TITLE'))))
+            templateHelper.prependHTMLBeforeGroup(field, 'autocomplete_street', $('<div/>').addClass('form-group').append($('<center/>').append($('<b/>').append(_t('GEOLOCATER_GROUP_GEOLOCATIZATION')))))
             templateHelper.defineLabelHintForGroup(field, 'autocomplete_street1', _t('GEOLOCATER_OPTIONNAL'))
+            templateHelper.prependHTMLBeforeGroup(field, 'autocomplete_street1', $('<div/>').addClass('form-group').append($('<button/>').addClass('btn btn-info btn-xs').append(_t('GEOLOCATER_SEE_ADVANCED_PARAMS')).on(
+                'click',
+                function (event){
+                  if ($(this).hasClass('opened')){
+                    $(this).removeClass('opened')
+                    $(this).html(_t('GEOLOCATER_SEE_ADVANCED_PARAMS'));
+                    toggleStates('hide')
+                  } else {
+                    $(this).addClass('opened')
+                    $(this).html(_t('GEOLOCATER_HIDE_ADVANCED_PARAMS'));
+                    toggleStates('show')
+                  }
+                  event.preventDefault()
+                  event.stopPropagation()
+                }
+              )))
+              toggleStates('hide')
             templateHelper.defineLabelHintForGroup(field, 'autocomplete_street2', _t('GEOLOCATER_OPTIONNAL'))
             templateHelper.defineLabelHintForGroup(field, 'autocomplete_county', _t('GEOLOCATER_OPTIONNAL'))
             templateHelper.defineLabelHintForGroup(field, 'autocomplete_state', _t('GEOLOCATER_OPTIONNAL'))
+            templateHelper.defineLabelHintForGroup(field, 'autocomplete_town', _t('GEOLOCATER_OPTIONNAL'))
+            templateHelper.defineLabelHintForGroup(field, 'autocomplete_postalcode', _t('GEOLOCATER_OPTIONNAL'))
         }
     }
 }
